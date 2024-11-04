@@ -176,7 +176,35 @@ class Board:
         # - return 0 if the visibility is exactly as clue
         # - return 1 if the visibility is more than clues
         # - return -1 if the visibility is less than clues
-        pass
+
+        tallest_skyscraper = 0
+        skyscrapers_visable_right = 0
+
+        # right to left
+        for height in buildings:
+            if height > tallest_skyscraper:
+                tallest_skyscraper = height
+                skyscrapers_visable_right += 1
+
+        tallest_skyscraper = 0
+        skyscrapers_visable_left = 0
+
+        # left to right
+        for height in reversed(buildings):
+            if height > tallest_skyscraper:
+                tallest_skyscraper = height
+                skyscrapers_visable_left += 1
+
+        # visibility is exactly as clue
+        if skyscrapers_visable_right == right_clue and skyscrapers_visable_left == left_clue:
+            return 0
+        # visibility is more than clues
+        elif skyscrapers_visable_right >= right_clue and skyscrapers_visable_left >= left_clue:
+            return 1
+        # visibility is less than clues
+        else:
+            return -1
+        
 
     def search(self) -> bool:
         # TODO: Implement backtracking search
@@ -188,7 +216,43 @@ class Board:
         #    - If solution found, return True
         #    - If dead end, backtrack
         # 3. Return False if no solution found
-        pass
+
+        min_domain = self.N + 1
+        chosen_row = None
+        chosen_col = None
+
+        # checks to see if puzzle is solvable
+        for row in range(self.N):
+            for col in range(self.N):
+                if self.grid[row][col] == 0 and len(self.doamin[row][col]) == 0:
+                    return False
+
+        for row in range(self.N):
+            for col in range(self.N):
+                if self.grid[row][col] == 0 and 1 < len(self.domain[row][col]) < min_domain:
+                    min_domain = len(self.domain[row][col])
+                    chosen_row = row
+                    chosen_col = col
+        
+        # checks to see if puzzle is completed 
+        if chosen_row == None and chosen_row == None:
+            return self.is_valid()
+
+        for value in self.domain[chosen_row][chosen_col]:
+            
+            self.grid[chosen_row][chosen_col] = value
+
+            # apply constraints and contiue search
+            if self.apply_constraint() and self.search():
+                # if solution is found then True is returned
+                return True
+            
+            # if dead end change the cell back to 0
+            self.grid[chosen_row][chosen_col] = 0
+
+        return False
+
+
 
     def transpose_matrix(N: int, matrix: list[list[int]]) -> list[list[int]]:
         # Create an empty matrix to store the transposed matrix
